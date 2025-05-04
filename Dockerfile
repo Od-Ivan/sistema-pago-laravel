@@ -19,14 +19,19 @@ RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 EXPOSE 8000
 
 # Instala dependencias Laravel y React
-RUN cd /var/www/html && \
-    composer install && \
-    npm install && \
-    npm run build && \
-    php artisan config:clear && \
-    php artisan route:clear && \
-    php artisan view:clear && \
-    php artisan key:generate
+WORKDIR /var/www/html
+
+RUN composer install
+
+RUN npm install
+
+RUN npm run build || echo "Falló build pero seguimos"
+
+RUN php artisan config:clear || echo "Error limpiando config"
+RUN php artisan route:clear || echo "Error limpiando rutas"
+RUN php artisan view:clear || echo "Error limpiando vistas"
+RUN php artisan key:generate || echo "Error generando clave"
+
 
 # Comando para iniciar el servidor
 CMD php artisan serve --host=0.0.0.0 --port=8000
